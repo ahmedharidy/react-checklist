@@ -1,0 +1,81 @@
+import { useState } from "react";
+
+export default function App() {
+  const [items, setItems] = useState([]);
+
+  function handleClearList() {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete all items? ",
+    );
+
+    if (confirmed) setItems([]);
+  }
+  function handleAddItems(item) {
+    setItems((items) => [...items, item]);
+  }
+
+  function handleDeleteItem(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
+  }
+
+  function handleToggleItem(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item,
+      ),
+    );
+  }
+
+  return (
+    <div className="app">
+      <Logo />
+      <Form onAddItems={handleAddItems} />
+      <PackingList
+        onToggleItems={handleToggleItem}
+        onDeleteItem={handleDeleteItem}
+        items={items}
+        onClearList={handleClearList}
+      />
+      <Stats items={items} />
+    </div>
+  );
+}
+
+function Item({ item, onDeleteItem, onToggleItems }) {
+  return (
+    <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => onToggleItems(item.id)}
+      />
+      <span style={item.packed ? { textDecoration: "line-through" } : {}}>
+        {item.quantity} {item.description}
+      </span>
+      <button onClick={() => onDeleteItem(item.id)}>❌</button>
+    </li>
+  );
+}
+
+function Stats({ items }) {
+  if (!items.length)
+    return (
+      <p className="stats">
+        <em>Start adding items to your packing list </em>
+      </p>
+    );
+  const numItems = items.length;
+  const numPacked = items.filter((item) => item.packed).length;
+  const percentage = Math.round((numPacked / numItems) * 100);
+
+  return (
+    <footer className="stats">
+      <em>
+        {percentage === 100
+          ? "You got everything! ready to go"
+          : `You have ${numItems} items on your list , and you already packed
+        ${numPacked} (${percentage}%)`}
+      </em>
+    </footer>
+  );
+}
